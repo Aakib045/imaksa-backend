@@ -5,7 +5,7 @@
 // ============================================================
 // CHANGE THIS TO YOUR BACKEND URL WHEN DEPLOYED
 // ============================================================
-const API_URL = 'http://localhost:5000/api';
+const API_URL = 'https://imaksa-backend-production.up.railway.app/api';
 // When live: const API_URL = 'https://your-backend.railway.app/api';
 
 // ── Get JWT token from localStorage ──
