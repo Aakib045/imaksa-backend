@@ -22,17 +22,23 @@ router.post('/', async (req, res) => {
       source: 'website',
     });
 
-    // Send email to client (IMAKSA owner) — don't fail if email fails
-    try {
-      await sendEnquiryEmail(enquiry);
-      await sendConfirmationEmail(enquiry); // confirmation to the lead
-    } catch (emailErr) {
-      console.log('Email failed (enquiry still saved):', emailErr.message);
-    }
-
+    // ── RESPOND IMMEDIATELY ──
+    res.set('Connection', 'keep-alive');
     res.status(201).json({
       success: true,
       message: 'Enquiry submitted successfully! We will contact you within 24 hours.',
+    });
+
+    // ── Send emails in BACKGROUND (after response sent) ──
+    // This way the website never hangs waiting for email
+    setImmediate(async () => {
+      try {
+        await sendEnquiryEmail(enquiry);
+        await sendConfirmationEmail(enquiry);
+        console.log('✅ Enquiry emails sent for:', enquiry.name);
+      } catch (emailErr) {
+        console.log('⚠️ Email failed (enquiry still saved):', emailErr.message);
+      }
     });
 
   } catch (error) {
