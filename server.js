@@ -75,26 +75,35 @@ if (process.env.NODE_ENV === 'development') {
 
 // ── Rate Limiting ──
 // Prevent spam attacks on contact form
+const limiterConfig = {
+  standardHeaders: true,
+  legacyHeaders: false,
+  validate: false, // disable strict checks that crash on Railway proxy
+};
+
 const formLimiter = rateLimit({
+  ...limiterConfig,
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // max 5 form submissions per 15 minutes per IP
-  message: { 
-    success: false, 
-    message: 'Too many submissions. Please wait 15 minutes.' 
+  max: 20, // max 20 form submissions per 15 minutes per IP
+  message: {
+    success: false,
+    message: 'Too many submissions. Please wait 15 minutes.'
   },
 });
 
 // General API limiter
 const apiLimiter = rateLimit({
+  ...limiterConfig,
   windowMs: 15 * 60 * 1000,
-  max: 200,
+  max: 500,
   message: { success: false, message: 'Too many requests.' },
 });
 
 // Login limiter — prevent brute force
 const loginLimiter = rateLimit({
+  ...limiterConfig,
   windowMs: 15 * 60 * 1000,
-  max: 10,
+  max: 20,
   message: { success: false, message: 'Too many login attempts. Please wait 15 minutes.' },
 });
 
@@ -108,7 +117,7 @@ app.use('/api/auth',        loginLimiter, authRoutes);
 app.use('/api/properties',  propertyRoutes);
 app.use('/api/blogs',       blogRoutes);
 app.use('/api/team',        teamRoutes);
-app.use('/api/enquiries',   formLimiter, enquiryRoutes);
+app.use('/api/enquiries',   enquiryRoutes);
 
 // ── Root route — health check ──
 app.get('/', (req, res) => {
